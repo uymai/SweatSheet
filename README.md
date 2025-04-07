@@ -45,6 +45,15 @@ A client-side application to analyze Peloton workout data, providing insights in
 3. Click "Process CSV" to analyze your data
 4. Explore your workout statistics and PRs
 
+### Using on GitHub Pages
+
+The application is hosted on GitHub Pages at [https://uymai.github.io/SweatSheet/](https://uymai.github.io/SweatSheet/).
+
+**Important Note for GitHub Pages Usage:**
+- Due to browser security restrictions, you'll need to download your Peloton CSV file to your computer first
+- When using the application on GitHub Pages, you must use the "Choose File" button to select your downloaded CSV file
+- The application cannot access files directly from Peloton's website due to Cross-Origin Resource Sharing (CORS) restrictions
+
 ## Technical Details
 
 - Built with vanilla JavaScript
