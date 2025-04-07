@@ -3,6 +3,11 @@ document.addEventListener('DOMContentLoaded', () => {
     const processBtn = document.getElementById('processBtn');
     let workoutData = [];
 
+    // Add chart instances at the top of the file
+    let workoutTypeChart = null;
+    let timeDistributionChart = null;
+    let instructorChart = null;
+
     // Enable process button when file is selected
     csvFileInput.addEventListener('change', (e) => {
         console.log('File selected:', e.target.files); // Debug log
@@ -32,15 +37,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Create workout type distribution chart
         const workoutTypeData = getWorkoutTypeDistribution(validData);
-        createPieChart('workoutTypeChart', 'Workout Type Distribution', workoutTypeData);
+        workoutTypeChart = createPieChart('workoutTypeChart', 'Workout Type Distribution', workoutTypeData);
 
         // Create time distribution chart
         const timeData = getTimeDistribution(validData);
-        createBarChart('timeDistributionChart', 'Workout Time Distribution', timeData);
+        timeDistributionChart = createBarChart('timeDistributionChart', 'Workout Time Distribution', timeData);
 
         // Create instructor distribution chart
         const instructorData = getInstructorDistribution(validData);
-        createBarChart('instructorChart', 'Top Instructors', instructorData);
+        instructorChart = createBarChart('instructorChart', 'Top Instructors', instructorData);
     }
 
     // PR navigation state
@@ -352,7 +357,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createPieChart(canvasId, title, data) {
         const ctx = document.getElementById(canvasId).getContext('2d');
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'pie',
             data: {
                 labels: data.labels,
@@ -378,7 +383,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     function createBarChart(canvasId, title, data) {
         const ctx = document.getElementById(canvasId).getContext('2d');
-        new Chart(ctx, {
+        return new Chart(ctx, {
             type: 'bar',
             data: {
                 labels: data.labels,
@@ -557,4 +562,99 @@ document.addEventListener('DOMContentLoaded', () => {
         document.getElementById('carEngine').textContent = `${(totalOutput / (CAR_ENGINE_POWER * 3600)).toFixed(1)}x`;
         document.getElementById('lightBulb').textContent = `${(totalOutput / (LIGHT_BULB_POWER * 86400)).toFixed(1)}x`;
     }
+
+    function resetApplication() {
+        // Reset charts
+        if (workoutTypeChart) {
+            workoutTypeChart.destroy();
+            workoutTypeChart = null;
+        }
+        if (timeDistributionChart) {
+            timeDistributionChart.destroy();
+            timeDistributionChart = null;
+        }
+        if (instructorChart) {
+            instructorChart.destroy();
+            instructorChart = null;
+        }
+
+        // Clear workout data
+        workoutData = [];
+        regularPRs = {};
+        laneBreakPRs = {};
+        currentPRIndex = 0;
+        currentRideType = 'regular';
+        currentDuration = 5;
+
+        // Reset UI elements
+        document.getElementById('workoutTypeChart').innerHTML = '';
+        document.getElementById('timeDistributionChart').innerHTML = '';
+        document.getElementById('instructorChart').innerHTML = '';
+        document.getElementById('prTitle').textContent = 'Select a ride type and duration';
+        document.getElementById('prClassDate').textContent = '';
+        document.getElementById('prWorkoutDate').textContent = '';
+        document.getElementById('prProgression').textContent = '';
+        document.getElementById('prInstructor').textContent = '';
+        document.getElementById('prOutput').textContent = '';
+        document.getElementById('prWatts').textContent = '';
+        document.getElementById('prResistance').textContent = '';
+        document.getElementById('prCadence').textContent = '';
+        document.getElementById('prSpeed').textContent = '';
+        document.getElementById('prDistance').textContent = '';
+        document.getElementById('prCalories').textContent = '';
+        document.getElementById('prHeartrate').textContent = '';
+
+        // Reset fun stats
+        document.getElementById('totalCalories').textContent = '0';
+        document.getElementById('bigMacs').textContent = '0';
+        document.getElementById('tvHours').textContent = '0';
+        document.getElementById('totalDistance').textContent = '0 km';
+        document.getElementById('aroundWorld').textContent = '0%';
+        document.getElementById('toMoon').textContent = '0%';
+        document.getElementById('totalOutput').textContent = '0 kJ';
+        document.getElementById('carEngine').textContent = '0x';
+        document.getElementById('lightBulb').textContent = '0x';
+
+        // Reset navigation buttons
+        document.getElementById('prevPR').disabled = true;
+        document.getElementById('nextPR').disabled = true;
+    }
+
+    // Update the file input change handler
+    document.getElementById('csvFile').addEventListener('change', function(e) {
+        const file = e.target.files[0];
+        if (file) {
+            // Reset the application state
+            resetApplication();
+            
+            Papa.parse(file, {
+                header: true,
+                complete: function(results) {
+                    workoutData = results.data;
+                    createVisualizations(workoutData);
+                    displayPRs(workoutData);
+                }
+            });
+        }
+    });
+
+    // Add process button click handler
+    document.getElementById('processBtn').addEventListener('click', function() {
+        const file = document.getElementById('csvFile').files[0];
+        if (file) {
+            // Reset the application state
+            resetApplication();
+            
+            Papa.parse(file, {
+                header: true,
+                complete: function(results) {
+                    workoutData = results.data;
+                    createVisualizations(workoutData);
+                    displayPRs(workoutData);
+                }
+            });
+        } else {
+            alert('Please select a CSV file first');
+        }
+    });
 }); 
