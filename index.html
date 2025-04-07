@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SweatSheet - Peloton Workout Analyzer</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Chart.js for visualizations -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- PapaParse for CSV parsing -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.0/papaparse.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <h1>SweatSheet</h1>
+        
+        <div class="file-upload">
+            <input type="file" id="csvFile" accept=".csv">
+            <button id="processBtn" disabled>Process CSV</button>
+        </div>
+
+        <div class="visualizations">
+            <div class="chart-container">
+                <h2>Workout Type Distribution</h2>
+                <canvas id="workoutTypeChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Workout Time Distribution</h2>
+                <canvas id="timeDistributionChart"></canvas>
+            </div>
+            
+            <div class="chart-container">
+                <h2>Top Instructors</h2>
+                <canvas id="instructorChart"></canvas>
+            </div>
+
+            <div class="pr-section">
+                <h2>Personal Records</h2>
+                <div class="pr-tabs">
+                    <button class="pr-tab active" data-type="regular">Regular Rides</button>
+                    <button class="pr-tab" data-type="lanebreak">LaneBreak Rides</button>
+                </div>
+                <div class="duration-tabs">
+                    <button class="duration-tab active" data-duration="5">5 min</button>
+                    <button class="duration-tab" data-duration="10">10 min</button>
+                    <button class="duration-tab" data-duration="15">15 min</button>
+                    <button class="duration-tab" data-duration="20">20 min</button>
+                    <button class="duration-tab" data-duration="30">30 min</button>
+                    <button class="duration-tab" data-duration="45">45 min</button>
+                    <button class="duration-tab" data-duration="60">60 min</button>
+                    <button class="duration-tab" data-duration="90">90 min</button>
+                    <button class="duration-tab" data-duration="120">2 hr</button>
+                </div>
+                <div class="pr-content">
+                    <div class="pr-card-container">
+                        <div class="pr-card">
+                            <div class="pr-header">
+                                <h3 id="prTitle">Select a ride type and duration</h3>
+                                <div class="pr-date">
+                                    <div class="timestamp-label">Class Date:</div>
+                                    <div id="prClassDate"></div>
+                                    <div class="timestamp-label">Workout Date:</div>
+                                    <div id="prWorkoutDate"></div>
+                                </div>
+                                <div class="pr-progression" id="prProgression"></div>
+                            </div>
+                            <div class="pr-content">
+                                <div class="pr-metric">
+                                    <span class="metric-label">Instructor:</span>
+                                    <span class="metric-value" id="prInstructor"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Output:</span>
+                                    <span class="metric-value" id="prOutput"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Avg Watts:</span>
+                                    <span class="metric-value" id="prWatts"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Avg Resistance:</span>
+                                    <span class="metric-value" id="prResistance"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Avg Cadence:</span>
+                                    <span class="metric-value" id="prCadence"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Avg Speed:</span>
+                                    <span class="metric-value" id="prSpeed"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Distance:</span>
+                                    <span class="metric-value" id="prDistance"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Calories:</span>
+                                    <span class="metric-value" id="prCalories"></span>
+                                </div>
+                                <div class="pr-metric">
+                                    <span class="metric-label">Avg Heartrate:</span>
+                                    <span class="metric-value" id="prHeartrate"></span>
+                                </div>
+                            </div>
+                            <div class="pr-navigation">
+                                <button id="prevPR" disabled>← Previous</button>
+                                <button id="nextPR" disabled>Next →</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="fun-stats-section">
+            <h2>Fun Stats</h2>
+            <div class="fun-stats-container">
+                <div class="fun-stat-card">
+                    <h3>Calories Burned</h3>
+                    <div class="fun-stat-content">
+                        <div class="stat-value" id="totalCalories">0</div>
+                        <div class="stat-comparison">
+                            <div class="comparison-item">
+                                <span class="comparison-label">Big Macs:</span>
+                                <span class="comparison-value" id="bigMacs">0</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="comparison-label">Hours of TV:</span>
+                                <span class="comparison-value" id="tvHours">0</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fun-stat-card">
+                    <h3>Total Distance</h3>
+                    <div class="fun-stat-content">
+                        <div class="stat-value" id="totalDistance">0 km</div>
+                        <div class="stat-comparison">
+                            <div class="comparison-item">
+                                <span class="comparison-label">Around the World:</span>
+                                <span class="comparison-value" id="aroundWorld">0%</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="comparison-label">To the Moon:</span>
+                                <span class="comparison-value" id="toMoon">0%</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="fun-stat-card">
+                    <h3>Total Output</h3>
+                    <div class="fun-stat-content">
+                        <div class="stat-value" id="totalOutput">0 kJ</div>
+                        <div class="stat-comparison">
+                            <div class="comparison-item">
+                                <span class="comparison-label">Car Engine (1 hour):</span>
+                                <span class="comparison-value" id="carEngine">0x</span>
+                            </div>
+                            <div class="comparison-item">
+                                <span class="comparison-label">Light Bulb (1 day):</span>
+                                <span class="comparison-value" id="lightBulb">0x</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html> 

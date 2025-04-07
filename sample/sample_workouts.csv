@@ -1,0 +1,11 @@
+Workout Timestamp,Live/On-Demand,Instructor Name,Length (minutes),Fitness Discipline,Type,Title,Class Timestamp,Total Output,Avg. Watts,Avg. Resistance,Avg. Cadence (RPM),Avg. Speed (kph),Distance (km),Calories Burned,Avg. Heartrate,Avg. Incline,Avg. Pace (min/km)
+2023-01-01 09:00 (EST),On Demand,Instructor A,30,Cycling,Power Zone,30 min Power Zone Ride,2022-12-15 10:00 (EST),250,150,45,85,25,12.5,350,145,,
+2023-01-02 10:00 (EST),On Demand,Instructor B,20,Strength,Upper Body,20 min Upper Body Strength,2022-12-20 11:00 (EST),,,,,,,200,,
+2023-01-03 08:00 (EST),On Demand,Instructor C,45,Cycling,HIIT,45 min HIIT & Hills,2022-12-10 09:00 (EST),350,180,50,90,28,21,450,155,,
+2023-01-04 17:00 (EST),On Demand,Instructor D,10,Stretching,Full Body,10 min Full Body Stretch,2022-12-25 18:00 (EST),,,,,,,50,,
+2023-01-05 07:00 (EST),On Demand,Instructor E,30,Cycling,Endurance,30 min Endurance Ride,2022-12-05 08:00 (EST),280,160,48,88,26,13,380,150,,
+2023-01-06 11:00 (EST),On Demand,Instructor F,20,Strength,Core,20 min Core Strength,2022-12-30 12:00 (EST),,,,,,,180,,
+2023-01-07 09:00 (EST),On Demand,Instructor G,45,Cycling,Climb,45 min Climb Ride,2022-12-12 10:00 (EST),320,170,52,85,24,18,420,160,,
+2023-01-08 16:00 (EST),On Demand,Instructor H,15,Stretching,Lower Body,15 min Lower Body Stretch,2022-12-22 17:00 (EST),,,,,,,60,,
+2023-01-09 08:00 (EST),On Demand,Instructor A,30,Cycling,Power Zone,30 min Power Zone Ride,2022-12-15 10:00 (EST),260,155,46,86,25.5,12.8,360,146,,
+2023-01-10 10:00 (EST),On Demand,Instructor B,20,Strength,Lower Body,20 min Lower Body Strength,2022-12-20 11:00 (EST),,,,,,,190,, 
