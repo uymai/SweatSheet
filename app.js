@@ -993,41 +993,76 @@ document.addEventListener('DOMContentLoaded', () => {
             // Reset the application state
             resetApplication();
             
-            Papa.parse(file, {
-                header: true,
-                complete: function(results) {
-                    allWorkouts = results.data;
-                    
-                    // Process workouts once to extract all necessary data
-                    const stats = processWorkoutsOnce(allWorkouts);
-                    
-                    // Update all UI components with the extracted data
-                    createVisualizations(allWorkouts, stats);
-                    displayPRs(allWorkouts);
-                    updatePerformanceTrends(stats.cyclingWorkouts);
-                    updateStreaks(stats);
-                }
-            });
+            // Show loading indicator
+            const loadingIndicator = document.createElement('div');
+            loadingIndicator.className = 'loading-indicator';
+            loadingIndicator.innerHTML = 'Processing data...';
+            document.querySelector('.container').appendChild(loadingIndicator);
+            
+            // Use setTimeout to allow the loading indicator to render
+            setTimeout(() => {
+                Papa.parse(file, {
+                    header: true,
+                    complete: function(results) {
+                        allWorkouts = results.data;
+                        
+                        // Process workouts once to extract all necessary data
+                        const stats = processWorkoutsOnce(allWorkouts);
+                        
+                        // Update all UI components with the extracted data
+                        createVisualizations(allWorkouts, stats);
+                        displayPRs(allWorkouts);
+                        updatePerformanceTrends(stats.cyclingWorkouts);
+                        updateStreaks(stats);
+                        
+                        // Remove loading indicator
+                        document.querySelector('.loading-indicator')?.remove();
+                        
+                        // Disable the process button since data is already processed
+                        const processBtn = document.getElementById('processBtn');
+                        processBtn.disabled = true;
+                        processBtn.textContent = 'Data Processed';
+                    },
+                    error: function(error) {
+                        console.error('Error parsing CSV:', error);
+                        document.querySelector('.loading-indicator')?.remove();
+                        alert('Error parsing CSV file. Please check the file format.');
+                    }
+                });
+            }, 50);
         }
     });
 
-    // Process button click handler
+    // Set up process button click handler - but it's no longer needed for normal operation
     document.getElementById('processBtn').addEventListener('click', function() {
         if (allWorkouts.length === 0) {
             alert('Please upload a CSV file first.');
             return;
         }
         
+        // This is now just a backup in case the user wants to reprocess the same data
         resetApplication();
         
-        // Process workouts once to extract all necessary data
-        const stats = processWorkoutsOnce(allWorkouts);
+        // Show loading indicator
+        const loadingIndicator = document.createElement('div');
+        loadingIndicator.className = 'loading-indicator';
+        loadingIndicator.innerHTML = 'Reprocessing data...';
+        document.querySelector('.container').appendChild(loadingIndicator);
         
-        // Update all UI components with the extracted data
-        createVisualizations(allWorkouts, stats);
-        displayPRs(allWorkouts);
-        updatePerformanceTrends(stats.cyclingWorkouts);
-        updateStreaks(stats);
+        // Use setTimeout to allow the loading indicator to render
+        setTimeout(() => {
+            // Process workouts once to extract all necessary data
+            const stats = processWorkoutsOnce(allWorkouts);
+            
+            // Update all UI components with the extracted data
+            createVisualizations(allWorkouts, stats);
+            displayPRs(allWorkouts);
+            updatePerformanceTrends(stats.cyclingWorkouts);
+            updateStreaks(stats);
+            
+            // Remove loading indicator
+            document.querySelector('.loading-indicator')?.remove();
+        }, 50);
     });
 
     // Process all workouts in a single pass

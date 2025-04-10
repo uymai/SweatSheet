@@ -35,36 +35,67 @@ h1 {
 
 /* File upload section */
 .file-upload {
-    text-align: center;
-    margin-bottom: 30px;
-    padding: 20px;
-    background-color: white;
+    background-color: #f8f9fa;
     border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-input[type="file"] {
-    margin-right: 10px;
+.file-upload-instructions {
+    text-align: center;
+    margin-bottom: 15px;
 }
 
-button {
+.small-note {
+    font-size: 0.8em;
+    color: #6c757d;
+    margin-top: 5px;
+}
+
+.file-upload-controls {
+    display: flex;
+    justify-content: center;
+    gap: 15px;
+    flex-wrap: wrap;
+}
+
+.file-upload-label {
+    display: inline-block;
     background-color: #3498db;
     color: white;
-    border: none;
     padding: 10px 20px;
-    border-radius: 4px;
+    border-radius: 5px;
     cursor: pointer;
-    font-size: 16px;
     transition: background-color 0.3s;
 }
 
-button:hover {
+.file-upload-label:hover {
     background-color: #2980b9;
 }
 
-button:disabled {
-    background-color: #bdc3c7;
+input[type="file"] {
+    display: none;
+}
+
+.secondary-button {
+    background-color: #e9ecef;
+    color: #495057;
+    border: 1px solid #ced4da;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.secondary-button:hover:not(:disabled) {
+    background-color: #dee2e6;
+    border-color: #adb5bd;
+}
+
+.secondary-button:disabled {
     cursor: not-allowed;
+    opacity: 0.6;
 }
 
 /* Chart containers */
@@ -602,4 +633,49 @@ button:disabled {
     font-size: 12px;
     color: #666;
     margin-bottom: 5px;
+}
+
+/* Add styling for the loading indicator */
+.loading-indicator {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: rgba(52, 152, 219, 0.9);
+    color: white;
+    padding: 15px 30px;
+    border-radius: 8px;
+    font-size: 16px;
+    font-weight: bold;
+    z-index: 1000;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.3);
+}
+
+/* Button styling */
+button, .button {
+    font-size: 14px;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid transparent;
+}
+
+.primary-button {
+    background-color: #3498db;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.3s;
+}
+
+.primary-button:hover:not(:disabled) {
+    background-color: #2980b9;
+}
+
+.primary-button:disabled {
+    background-color: #bdc3c7;
+    cursor: not-allowed;
 } 

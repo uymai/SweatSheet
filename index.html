@@ -15,8 +15,15 @@
         <h1>SweatSheet</h1>
         
         <div class="file-upload">
-            <input type="file" id="csvFile" accept=".csv">
-            <button id="processBtn" disabled>Process CSV</button>
+            <div class="file-upload-instructions">
+                <p>Select your Peloton workout history CSV file to analyze your data.</p>
+                <p class="small-note">Data is processed automatically. No data is sent to any server.</p>
+            </div>
+            <div class="file-upload-controls">
+                <label for="csvFile" class="file-upload-label">Choose CSV File</label>
+                <input type="file" id="csvFile" accept=".csv">
+                <button id="processBtn" class="secondary-button" disabled>Reprocess Data</button>
+            </div>
         </div>
 
         <div class="visualizations">
