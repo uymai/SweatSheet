@@ -518,6 +518,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // If no workout days, display a message and return
             if (!stats.workoutDays || stats.workoutDays.size === 0) {
                 safelyUpdateElement('longestStreak', 'No data');
+                safelyUpdateElement('favoriteDay', 'No data');
+                safelyUpdateElement('favoriteDayCount', '');
                 
                 const heatmapContainer = document.getElementById('workoutHeatmap');
                 if (heatmapContainer) {
@@ -534,40 +536,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Pass all workout types to the streak calculator
             const longestStreak = calculateLongestStreak(stats.validWorkouts || []);
             
+            // Update UI with streak information
             if (longestStreak > 0) {
-                // Create a streak display container if it doesn't exist
-                let streakContainer = document.getElementById('streakContainer');
-                if (!streakContainer) {
-                    // Get the parent element of longestStreak
-                    const longestStreakElement = document.getElementById('longestStreak');
-                    if (longestStreakElement) {
-                        const parentElement = longestStreakElement.parentNode;
-                        
-                        // Create a new container
-                        streakContainer = document.createElement('div');
-                        streakContainer.id = 'streakContainer';
-                        
-                        // Replace the longestStreak element with our container
-                        parentElement.replaceChild(streakContainer, longestStreakElement);
-                        
-                        // Re-add the original element to the container
-                        streakContainer.appendChild(longestStreakElement);
-                        
-                        // Add the lenient streak element
-                        const lenientStreakElement = document.createElement('span');
-                        lenientStreakElement.id = 'lenientStreak';
-                        lenientStreakElement.style.marginLeft = '10px';
-                        lenientStreakElement.style.fontSize = '0.9em';
-                        lenientStreakElement.style.color = '#666';
-                        streakContainer.appendChild(lenientStreakElement);
-                    }
-                }
-                
-                // Update the streak display
                 safelyUpdateElement('longestStreak', `${longestStreak} days`);
                 
-                // If the lenient streak is different from the standard streak, show it separately
-                const standardStreak = calculateStandardStreak(Array.from(stats.workoutDays).sort());
+                // Calculate standard streak (without missing day allowance)
+                // Get all unique workout dates for streak calculation
+                const workoutDates = Array.from(stats.workoutDays)
+                    .map(dateStr => new Date(dateStr))
+                    .sort((a, b) => a - b);
+                    
+                const standardStreak = calculateStandardStreak(workoutDates);
+                
+                // Show standard streak if different from the lenient streak
                 if (standardStreak !== longestStreak) {
                     safelyUpdateElement('lenientStreak', `(${standardStreak} days strict)`);
                 } else {
@@ -580,17 +561,105 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 safelyUpdateElement('longestStreak', 'No streaks found');
             }
+            
+            // Calculate favorite day of the week
+            const favoriteDay = calculateFavoriteWorkoutDay(stats.validWorkouts || []);
+            if (favoriteDay) {
+                safelyUpdateElement('favoriteDay', favoriteDay.day);
+                safelyUpdateElement('favoriteDayCount', `${favoriteDay.count} workouts`);
+            } else {
+                safelyUpdateElement('favoriteDay', 'Not enough data');
+                safelyUpdateElement('favoriteDayCount', '');
+            }
 
             // Create workout heatmap with all valid workouts
             createWorkoutHeatmap(stats.validWorkouts || []);
         } catch (error) {
             console.error('Error updating streaks:', error);
             safelyUpdateElement('longestStreak', 'Error calculating');
+            safelyUpdateElement('favoriteDay', 'Error');
+            safelyUpdateElement('favoriteDayCount', '');
             
             const heatmapContainer = document.getElementById('workoutHeatmap');
             if (heatmapContainer) {
                 heatmapContainer.innerHTML = '<p class="text-center text-danger">Error creating workout heatmap. See console for details.</p>';
             }
+        }
+    }
+    
+    function calculateFavoriteWorkoutDay(workouts) {
+        try {
+            if (!workouts || workouts.length === 0) {
+                return null;
+            }
+            
+            // Count workouts by day of week
+            const dayCount = {
+                'Sunday': 0,
+                'Monday': 0,
+                'Tuesday': 0,
+                'Wednesday': 0,
+                'Thursday': 0,
+                'Friday': 0,
+                'Saturday': 0
+            };
+            
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            // Count occurrences of each day
+            workouts.forEach(workout => {
+                try {
+                    if (!workout || !workout['Workout Timestamp']) return;
+                    
+                    // Handle various formats by removing timezone indicators
+                    const cleanTimestamp = workout['Workout Timestamp']
+                        .replace(/ \(EST\)/g, '')
+                        .replace(/ \(UTC\)/g, '')
+                        .replace(/ \(EDT\)/g, '')
+                        .replace(/ \([+-]\d{2}\)/g, '')
+                        .trim();
+                    
+                    // Parse the date
+                    const date = new Date(cleanTimestamp);
+                    
+                    // Skip invalid dates
+                    if (isNaN(date.getTime())) {
+                        console.warn(`Invalid date format for favorite day calculation: ${workout['Workout Timestamp']}`);
+                        return;
+                    }
+                    
+                    // Get day of week and increment counter
+                    const dayIndex = date.getDay();
+                    const day = dayNames[dayIndex];
+                    dayCount[day]++;
+                } catch (e) {
+                    console.error('Error processing workout date for favorite day:', e);
+                }
+            });
+            
+            // Find the day with the most workouts
+            let maxDay = null;
+            let maxCount = 0;
+            
+            for (const [day, count] of Object.entries(dayCount)) {
+                if (count > maxCount) {
+                    maxDay = day;
+                    maxCount = count;
+                }
+            }
+            
+            // Only return a result if we have at least 3 workouts on that day
+            if (maxCount >= 3) {
+                return {
+                    day: maxDay,
+                    count: maxCount
+                };
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error calculating favorite workout day:', error);
+            return null;
         }
     }
 
@@ -1941,6 +2010,8 @@ document.addEventListener('DOMContentLoaded', () => {
             // If no workout days, display a message and return
             if (!stats.workoutDays || stats.workoutDays.size === 0) {
                 safelyUpdateElement('longestStreak', 'No data');
+                safelyUpdateElement('favoriteDay', 'No data');
+                safelyUpdateElement('favoriteDayCount', '');
                 
                 const heatmapContainer = document.getElementById('workoutHeatmap');
                 if (heatmapContainer) {
@@ -1957,40 +2028,19 @@ document.addEventListener('DOMContentLoaded', () => {
             // Pass all workout types to the streak calculator
             const longestStreak = calculateLongestStreak(stats.validWorkouts || []);
             
+            // Update UI with streak information
             if (longestStreak > 0) {
-                // Create a streak display container if it doesn't exist
-                let streakContainer = document.getElementById('streakContainer');
-                if (!streakContainer) {
-                    // Get the parent element of longestStreak
-                    const longestStreakElement = document.getElementById('longestStreak');
-                    if (longestStreakElement) {
-                        const parentElement = longestStreakElement.parentNode;
-                        
-                        // Create a new container
-                        streakContainer = document.createElement('div');
-                        streakContainer.id = 'streakContainer';
-                        
-                        // Replace the longestStreak element with our container
-                        parentElement.replaceChild(streakContainer, longestStreakElement);
-                        
-                        // Re-add the original element to the container
-                        streakContainer.appendChild(longestStreakElement);
-                        
-                        // Add the lenient streak element
-                        const lenientStreakElement = document.createElement('span');
-                        lenientStreakElement.id = 'lenientStreak';
-                        lenientStreakElement.style.marginLeft = '10px';
-                        lenientStreakElement.style.fontSize = '0.9em';
-                        lenientStreakElement.style.color = '#666';
-                        streakContainer.appendChild(lenientStreakElement);
-                    }
-                }
-                
-                // Update the streak display
                 safelyUpdateElement('longestStreak', `${longestStreak} days`);
                 
-                // If the lenient streak is different from the standard streak, show it separately
-                const standardStreak = calculateStandardStreak(Array.from(stats.workoutDays).sort());
+                // Calculate standard streak (without missing day allowance)
+                // Get all unique workout dates for streak calculation
+                const workoutDates = Array.from(stats.workoutDays)
+                    .map(dateStr => new Date(dateStr))
+                    .sort((a, b) => a - b);
+                    
+                const standardStreak = calculateStandardStreak(workoutDates);
+                
+                // Show standard streak if different from the lenient streak
                 if (standardStreak !== longestStreak) {
                     safelyUpdateElement('lenientStreak', `(${standardStreak} days strict)`);
                 } else {
@@ -2003,17 +2053,105 @@ document.addEventListener('DOMContentLoaded', () => {
             } else {
                 safelyUpdateElement('longestStreak', 'No streaks found');
             }
+            
+            // Calculate favorite day of the week
+            const favoriteDay = calculateFavoriteWorkoutDay(stats.validWorkouts || []);
+            if (favoriteDay) {
+                safelyUpdateElement('favoriteDay', favoriteDay.day);
+                safelyUpdateElement('favoriteDayCount', `${favoriteDay.count} workouts`);
+            } else {
+                safelyUpdateElement('favoriteDay', 'Not enough data');
+                safelyUpdateElement('favoriteDayCount', '');
+            }
 
             // Create workout heatmap with all valid workouts
             createWorkoutHeatmap(stats.validWorkouts || []);
         } catch (error) {
             console.error('Error updating streaks:', error);
             safelyUpdateElement('longestStreak', 'Error calculating');
+            safelyUpdateElement('favoriteDay', 'Error');
+            safelyUpdateElement('favoriteDayCount', '');
             
             const heatmapContainer = document.getElementById('workoutHeatmap');
             if (heatmapContainer) {
                 heatmapContainer.innerHTML = '<p class="text-center text-danger">Error creating workout heatmap. See console for details.</p>';
             }
+        }
+    }
+    
+    function calculateFavoriteWorkoutDay(workouts) {
+        try {
+            if (!workouts || workouts.length === 0) {
+                return null;
+            }
+            
+            // Count workouts by day of week
+            const dayCount = {
+                'Sunday': 0,
+                'Monday': 0,
+                'Tuesday': 0,
+                'Wednesday': 0,
+                'Thursday': 0,
+                'Friday': 0,
+                'Saturday': 0
+            };
+            
+            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            // Count occurrences of each day
+            workouts.forEach(workout => {
+                try {
+                    if (!workout || !workout['Workout Timestamp']) return;
+                    
+                    // Handle various formats by removing timezone indicators
+                    const cleanTimestamp = workout['Workout Timestamp']
+                        .replace(/ \(EST\)/g, '')
+                        .replace(/ \(UTC\)/g, '')
+                        .replace(/ \(EDT\)/g, '')
+                        .replace(/ \([+-]\d{2}\)/g, '')
+                        .trim();
+                    
+                    // Parse the date
+                    const date = new Date(cleanTimestamp);
+                    
+                    // Skip invalid dates
+                    if (isNaN(date.getTime())) {
+                        console.warn(`Invalid date format for favorite day calculation: ${workout['Workout Timestamp']}`);
+                        return;
+                    }
+                    
+                    // Get day of week and increment counter
+                    const dayIndex = date.getDay();
+                    const day = dayNames[dayIndex];
+                    dayCount[day]++;
+                } catch (e) {
+                    console.error('Error processing workout date for favorite day:', e);
+                }
+            });
+            
+            // Find the day with the most workouts
+            let maxDay = null;
+            let maxCount = 0;
+            
+            for (const [day, count] of Object.entries(dayCount)) {
+                if (count > maxCount) {
+                    maxDay = day;
+                    maxCount = count;
+                }
+            }
+            
+            // Only return a result if we have at least 3 workouts on that day
+            if (maxCount >= 3) {
+                return {
+                    day: maxDay,
+                    count: maxCount
+                };
+            }
+            
+            return null;
+        } catch (error) {
+            console.error('Error calculating favorite workout day:', error);
+            return null;
         }
     }
 

@@ -606,6 +606,12 @@ input[type="file"] {
     color: #2ecc71;
 }
 
+.streak-detail {
+    font-size: 14px;
+    color: #7f8c8d;
+    margin-top: 5px;
+}
+
 .heatmap-container {
     width: 100%;
     overflow-x: auto;
