@@ -145,14 +145,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         timeDistributionChart = createBarChart('timeDistributionChart', 'Workout Time Distribution', timeData);
         
-        // 3. Update instructor chart
-        const sortedInstructors = Object.entries(data.instructorStats)
+        // 3. Update instructor chart - filter out "Unknown" instructors
+        const filteredInstructors = Object.entries(data.instructorStats)
+            .filter(([instructor]) => instructor !== 'Unknown')
             .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 10);
         
         const instructorData = {
-            labels: sortedInstructors.map(item => item[0]),
-            data: sortedInstructors.map(item => item[1].count)
+            labels: filteredInstructors.map(item => item[0]),
+            data: filteredInstructors.map(item => item[1].count)
         };
         instructorChart = createBarChart('instructorChart', 'Top Instructors', instructorData);
         
@@ -224,12 +225,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Total calories
         document.getElementById('totalCaloriesStats').textContent = data.totalCalories.toLocaleString();
 
-        // Favorite instructor
+        // Favorite instructor - skip 'Unknown' instructors
         let favoriteInstructor = '-';
         let favoriteInstructorTime = 0;
         let maxClasses = 0;
         Object.entries(data.instructorStats).forEach(([instructor, stats]) => {
-            if (stats.count > maxClasses) {
+            if (instructor !== 'Unknown' && stats.count > maxClasses) {
                 maxClasses = stats.count;
                 favoriteInstructor = instructor;
                 favoriteInstructorTime = stats.minutes;
@@ -862,13 +863,6 @@ document.addEventListener('DOMContentLoaded', () => {
                     title: {
                         display: true,
                         text: 'PR Progression Over Time'
-                    },
-                    tooltip: {
-                        callbacks: {
-                            label: function(context) {
-                                return `${context.dataset.label}: ${context.parsed.y} kJ`;
-                            }
-                        }
                     }
                 },
                 scales: {
@@ -1191,14 +1185,15 @@ document.addEventListener('DOMContentLoaded', () => {
         };
         timeDistributionChart = createBarChart('timeDistributionChart', 'Workout Time Distribution', timeData);
 
-        // Create instructor distribution chart
-        const sortedInstructors = Object.entries(stats.instructorStats)
+        // Create instructor distribution chart - filter out "Unknown" instructors
+        const filteredInstructors = Object.entries(stats.instructorStats)
+            .filter(([instructor]) => instructor !== 'Unknown')
             .sort((a, b) => b[1].count - a[1].count)
             .slice(0, 10);
         
         const instructorData = {
-            labels: sortedInstructors.map(item => item[0]),
-            data: sortedInstructors.map(item => item[1].count)
+            labels: filteredInstructors.map(item => item[0]),
+            data: filteredInstructors.map(item => item[1].count)
         };
         instructorChart = createBarChart('instructorChart', 'Top Instructors', instructorData);
 
@@ -1233,12 +1228,12 @@ document.addEventListener('DOMContentLoaded', () => {
         // Total calories
         document.getElementById('totalCaloriesStats').textContent = stats.totalCalories.toLocaleString();
 
-        // Favorite instructor
+        // Favorite instructor - skip 'Unknown' instructors
         let favoriteInstructor = '-';
         let favoriteInstructorTime = 0;
         let maxClasses = 0;
         Object.entries(stats.instructorStats).forEach(([instructor, info]) => {
-            if (info.count > maxClasses) {
+            if (instructor !== 'Unknown' && info.count > maxClasses) {
                 maxClasses = info.count;
                 favoriteInstructor = instructor;
                 favoriteInstructorTime = info.minutes;
@@ -1381,6 +1376,22 @@ document.addEventListener('DOMContentLoaded', () => {
             length: workout[lengthField]
         }));
 
+        // Calculate moving average if we have enough data points
+        let averageData = [];
+        if (data.length >= 3) {
+            const windowSize = Math.min(3, Math.floor(data.length / 2)); // Use a window of 3 or half the data points
+            for (let i = windowSize - 1; i < data.length; i++) {
+                let sum = 0;
+                for (let j = 0; j < windowSize; j++) {
+                    sum += data[i - j].y;
+                }
+                averageData.push({
+                    x: data[i].x,
+                    y: sum / windowSize
+                });
+            }
+        }
+
         if (outputTrendChart) {
             outputTrendChart.destroy();
         }
@@ -1388,14 +1399,26 @@ document.addEventListener('DOMContentLoaded', () => {
         outputTrendChart = new Chart(ctx, {
             type: 'scatter',
             data: {
-                datasets: [{
-                    label: length ? `${length} min Output` : 'Workout Output',
-                    data: data,
-                    borderColor: '#3498db',
-                    backgroundColor: '#3498db',
-                    pointRadius: 5,
-                    pointHoverRadius: 7
-                }]
+                datasets: [
+                    {
+                        label: length ? `${length} min Output` : 'Output',
+                        data: data,
+                        borderColor: '#3498db',
+                        backgroundColor: '#3498db',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    },
+                    ...(averageData.length > 0 ? [{
+                        label: 'Moving Average (3 workouts)',
+                        data: averageData,
+                        borderColor: '#2ecc71',
+                        backgroundColor: 'transparent',
+                        pointRadius: 0,
+                        borderWidth: 2,
+                        type: 'line',
+                        tension: 0.4
+                    }] : [])
+                ]
             },
             options: {
                 responsive: true,
@@ -1408,12 +1431,16 @@ document.addEventListener('DOMContentLoaded', () => {
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                const data = context.raw;
-                                return [
-                                    `Output: ${data.y} kJ`,
-                                    `Date: ${data.date}`,
-                                    `Length: ${data.length} min`
-                                ];
+                                if (context.datasetIndex === 0) {
+                                    const workout = filteredWorkouts[context.dataIndex];
+                                    return [
+                                        `Output: ${workout[outputField]} kJ`,
+                                        `Date: ${new Date(workout['Workout Timestamp']).toLocaleDateString()}`,
+                                        `Length: ${workout[lengthField]} min`
+                                    ];
+                                } else {
+                                    return `Moving Average: ${context.raw.y.toFixed(1)} kJ`;
+                                }
                             }
                         }
                     }
