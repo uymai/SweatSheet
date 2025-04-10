@@ -2166,11 +2166,6 @@ document.addEventListener('DOMContentLoaded', () => {
             }
         }
     }
-    
-        } catch (error) {
-            console.error('Error creating day distribution chart:', error);
-        }
-    }
 
     function createOutputTrendChart(workouts, outputField = 'Total Output', lengthField = 'Length (minutes)') {
         const canvas = document.getElementById('outputTrendChart');
@@ -2566,4 +2561,4 @@ document.addEventListener('DOMContentLoaded', () => {
         const mins = minutes % 60;
         return `${hours}h ${mins}m`;
     }
-}); 
+});
