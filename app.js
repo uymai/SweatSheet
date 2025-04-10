@@ -637,6 +637,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             });
             
+            // Create/update the day distribution chart
+            createDayDistributionChart(dayCount);
+            
             // Find the day with the most workouts
             let maxDay = null;
             let maxCount = 0;
@@ -660,6 +663,91 @@ document.addEventListener('DOMContentLoaded', () => {
         } catch (error) {
             console.error('Error calculating favorite workout day:', error);
             return null;
+        }
+    }
+    
+    function createDayDistributionChart(dayCount) {
+        try {
+            const canvas = document.getElementById('dayDistributionChart');
+            if (!canvas) {
+                console.warn('Day distribution chart canvas not found');
+                return;
+            }
+            
+            // Define ordered days of the week (starting with Sunday)
+            const orderedDays = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            
+            // Prepare data in the correct order
+            const labels = orderedDays;
+            const data = orderedDays.map(day => dayCount[day] || 0);
+            
+            // Find the max count to highlight the favorite day
+            const maxCount = Math.max(...data);
+            const maxIndex = data.indexOf(maxCount);
+            
+            // Create color array with the max value highlighted
+            const backgroundColors = data.map((value, index) => 
+                index === maxIndex ? '#2ecc71' : '#95a5a6'
+            );
+            
+            // Check if we already have a chart and destroy it
+            if (window.dayDistributionChart instanceof Chart) {
+                window.dayDistributionChart.destroy();
+            }
+            
+            // Create the chart
+            window.dayDistributionChart = new Chart(canvas.getContext('2d'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Workouts',
+                        data: data,
+                        backgroundColor: backgroundColors,
+                        borderColor: backgroundColors.map(color => color === '#2ecc71' ? '#27ae60' : '#7f8c8d'),
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const value = context.raw;
+                                    return value === 1 ? '1 workout' : `${value} workouts`;
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            },
+                            title: {
+                                display: true,
+                                text: 'Workouts'
+                            }
+                        },
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Day of Week'
+                            }
+                        }
+                    }
+                }
+            });
+            
+            console.log('Day distribution chart created successfully');
+        } catch (error) {
+            console.error('Error creating day distribution chart:', error);
         }
     }
 
@@ -2079,79 +2167,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
     
-    function calculateFavoriteWorkoutDay(workouts) {
-        try {
-            if (!workouts || workouts.length === 0) {
-                return null;
-            }
-            
-            // Count workouts by day of week
-            const dayCount = {
-                'Sunday': 0,
-                'Monday': 0,
-                'Tuesday': 0,
-                'Wednesday': 0,
-                'Thursday': 0,
-                'Friday': 0,
-                'Saturday': 0
-            };
-            
-            const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
-            
-            // Count occurrences of each day
-            workouts.forEach(workout => {
-                try {
-                    if (!workout || !workout['Workout Timestamp']) return;
-                    
-                    // Handle various formats by removing timezone indicators
-                    const cleanTimestamp = workout['Workout Timestamp']
-                        .replace(/ \(EST\)/g, '')
-                        .replace(/ \(UTC\)/g, '')
-                        .replace(/ \(EDT\)/g, '')
-                        .replace(/ \([+-]\d{2}\)/g, '')
-                        .trim();
-                    
-                    // Parse the date
-                    const date = new Date(cleanTimestamp);
-                    
-                    // Skip invalid dates
-                    if (isNaN(date.getTime())) {
-                        console.warn(`Invalid date format for favorite day calculation: ${workout['Workout Timestamp']}`);
-                        return;
-                    }
-                    
-                    // Get day of week and increment counter
-                    const dayIndex = date.getDay();
-                    const day = dayNames[dayIndex];
-                    dayCount[day]++;
-                } catch (e) {
-                    console.error('Error processing workout date for favorite day:', e);
-                }
-            });
-            
-            // Find the day with the most workouts
-            let maxDay = null;
-            let maxCount = 0;
-            
-            for (const [day, count] of Object.entries(dayCount)) {
-                if (count > maxCount) {
-                    maxDay = day;
-                    maxCount = count;
-                }
-            }
-            
-            // Only return a result if we have at least 3 workouts on that day
-            if (maxCount >= 3) {
-                return {
-                    day: maxDay,
-                    count: maxCount
-                };
-            }
-            
-            return null;
         } catch (error) {
-            console.error('Error calculating favorite workout day:', error);
-            return null;
+            console.error('Error creating day distribution chart:', error);
         }
     }
 
