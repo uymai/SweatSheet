@@ -533,24 +533,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const workoutDaysCount = Array.from(stats.workoutDays).length;
             console.log(`Found ${workoutDaysCount} workout days for streak calculation`);
             
-            // Pass all workout types to the streak calculator
-            const longestStreak = calculateLongestStreak(stats.validWorkouts || []);
+            // Get all unique workout dates for streak calculation
+            const workoutDates = Array.from(stats.workoutDays)
+                .map(dateStr => new Date(dateStr))
+                .sort((a, b) => a - b);
+                
+            // Calculate standard streak (strict consecutive days)
+            const standardStreak = calculateStandardStreak(workoutDates);
+            
+            // Calculate lenient streak (allows for missing days)
+            const lenientStreak = calculateLongestStreak(stats.validWorkouts || []);
             
             // Update UI with streak information
-            if (longestStreak > 0) {
-                safelyUpdateElement('longestStreak', `${longestStreak} days`);
+            if (standardStreak > 0) {
+                safelyUpdateElement('longestStreak', `${standardStreak} days`);
                 
-                // Calculate standard streak (without missing day allowance)
-                // Get all unique workout dates for streak calculation
-                const workoutDates = Array.from(stats.workoutDays)
-                    .map(dateStr => new Date(dateStr))
-                    .sort((a, b) => a - b);
-                    
-                const standardStreak = calculateStandardStreak(workoutDates);
-                
-                // Show standard streak if different from the lenient streak
-                if (standardStreak !== longestStreak) {
-                    safelyUpdateElement('lenientStreak', `(${standardStreak} days strict)`);
+                // Show lenient streak if different from the standard streak
+                if (standardStreak !== lenientStreak) {
+                    safelyUpdateElement('lenientStreak', ` (${lenientStreak} days with gaps)`);
                 } else {
                     // If they're the same, hide the lenient streak display
                     const lenientElement = document.getElementById('lenientStreak');
@@ -2113,24 +2113,24 @@ document.addEventListener('DOMContentLoaded', () => {
             const workoutDaysCount = Array.from(stats.workoutDays).length;
             console.log(`Found ${workoutDaysCount} workout days for streak calculation`);
             
-            // Pass all workout types to the streak calculator
-            const longestStreak = calculateLongestStreak(stats.validWorkouts || []);
+            // Get all unique workout dates for streak calculation
+            const workoutDates = Array.from(stats.workoutDays)
+                .map(dateStr => new Date(dateStr))
+                .sort((a, b) => a - b);
+                
+            // Calculate standard streak (strict consecutive days)
+            const standardStreak = calculateStandardStreak(workoutDates);
+            
+            // Calculate lenient streak (allows for missing days)
+            const lenientStreak = calculateLongestStreak(stats.validWorkouts || []);
             
             // Update UI with streak information
-            if (longestStreak > 0) {
-                safelyUpdateElement('longestStreak', `${longestStreak} days`);
+            if (standardStreak > 0) {
+                safelyUpdateElement('longestStreak', `${standardStreak} days`);
                 
-                // Calculate standard streak (without missing day allowance)
-                // Get all unique workout dates for streak calculation
-                const workoutDates = Array.from(stats.workoutDays)
-                    .map(dateStr => new Date(dateStr))
-                    .sort((a, b) => a - b);
-                    
-                const standardStreak = calculateStandardStreak(workoutDates);
-                
-                // Show standard streak if different from the lenient streak
-                if (standardStreak !== longestStreak) {
-                    safelyUpdateElement('lenientStreak', `(${standardStreak} days strict)`);
+                // Show lenient streak if different from the standard streak
+                if (standardStreak !== lenientStreak) {
+                    safelyUpdateElement('lenientStreak', ` (${lenientStreak} days with gaps)`);
                 } else {
                     // If they're the same, hide the lenient streak display
                     const lenientElement = document.getElementById('lenientStreak');
