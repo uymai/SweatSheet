@@ -684,8 +684,26 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add month label
                 const monthLabel = document.createElement('div');
                 monthLabel.className = 'heatmap-month-label';
-                monthLabel.textContent = currentDate.toLocaleString('default', { month: 'short' });
+                monthLabel.textContent = currentDate.toLocaleString('default', { month: 'short' }) + ' ' + currentDate.getFullYear();
                 monthDiv.appendChild(monthLabel);
+                
+                // Add day of week header
+                const weekdayHeader = document.createElement('div');
+                weekdayHeader.className = 'day-of-week-header';
+                
+                // Add abbreviated day names
+                const dayNames = ['S', 'M', 'T', 'W', 'T', 'F', 'S'];
+                for (let i = 0; i < 7; i++) {
+                    const daySpan = document.createElement('span');
+                    daySpan.textContent = dayNames[i];
+                    weekdayHeader.appendChild(daySpan);
+                }
+                monthDiv.appendChild(weekdayHeader);
+                
+                // Create grid for days
+                const daysGrid = document.createElement('div');
+                daysGrid.className = 'month-days-grid';
+                monthDiv.appendChild(daysGrid);
 
                 // Calculate days for this month
                 const year = currentDate.getFullYear();
@@ -696,8 +714,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 // Add empty cells for days before the 1st of the month
                 for (let i = 0; i < firstDayOfMonth; i++) {
                     const emptyDay = document.createElement('div');
-                    emptyDay.className = 'heatmap-day';
-                    monthDiv.appendChild(emptyDay);
+                    emptyDay.className = 'heatmap-day empty-day';
+                    daysGrid.appendChild(emptyDay);
                 }
 
                 // Add days of the month
@@ -712,7 +730,11 @@ document.addEventListener('DOMContentLoaded', () => {
                     // Create day element
                     const dayDiv = document.createElement('div');
                     dayDiv.className = 'heatmap-day';
+                    dayDiv.setAttribute('data-date', dateStr);
                     dayDiv.setAttribute('title', dateStr + (workoutCount > 0 ? ` (${workoutCount} workouts)` : ''));
+                    
+                    // Add day number as text
+                    dayDiv.textContent = day;
                     
                     // Add intensity level based on workout count
                     if (workoutCount > 0) {
@@ -722,7 +744,17 @@ document.addEventListener('DOMContentLoaded', () => {
                         dayDiv.style.cursor = 'pointer';
                     }
 
-                    monthDiv.appendChild(dayDiv);
+                    daysGrid.appendChild(dayDiv);
+                }
+                
+                // Add empty cells at the end if needed to complete the grid
+                const totalCells = firstDayOfMonth + daysInMonth;
+                const cellsToAdd = totalCells % 7 === 0 ? 0 : 7 - (totalCells % 7);
+                
+                for (let i = 0; i < cellsToAdd; i++) {
+                    const emptyDay = document.createElement('div');
+                    emptyDay.className = 'heatmap-day empty-day';
+                    daysGrid.appendChild(emptyDay);
                 }
 
                 // Add the month to the heatmap
