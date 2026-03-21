@@ -9,6 +9,7 @@ Thumbs.db
 
 # Dependencies
 node_modules/
+dist/
 
 # IDE files
 .idea/
