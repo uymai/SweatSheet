@@ -20,7 +20,6 @@ export default function App() {
   const [selectedRideType, setSelectedRideType] = useState<RideType>('regular');
   const [selectedDuration, setSelectedDuration] = useState(30);
   const [selectedPRIndex, setSelectedPRIndex] = useState(0);
-  const [selectedTrendLength, setSelectedTrendLength] = useState<number | null>(null);
   const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
   const [darkMode, setDarkMode] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
   const [settingsOpen, setSettingsOpen] = useState(false);
@@ -72,7 +71,6 @@ export default function App() {
       setSelectedRideType('regular');
       setSelectedDuration(resolveDefaultDuration(nextAnalysis));
       setSelectedPRIndex(0);
-      setSelectedTrendLength(null);
       setFileName(currentFileName);
       setStatusMessage(
         normalization.issues.length === 0
@@ -186,7 +184,7 @@ export default function App() {
       ) : (
         <main className="dashboard">
           <StatsSections analytics={analysis} unitSystem={unitSystem} />
-          <ChartsSection analytics={analysis} selectedTrendLength={selectedTrendLength} onSelectTrendLength={setSelectedTrendLength} />
+          <ChartsSection analytics={analysis} />
           <PRSection
             analytics={analysis}
             rideType={selectedRideType}

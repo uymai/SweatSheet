@@ -20,16 +20,41 @@ import { formatNumber } from '../../lib/format';
 
 const CHART_COLORS = ['#1f6feb', '#ff6a3d', '#1fbf75', '#ffb400', '#6f42c1', '#0ea5e9', '#c026d3', '#334155'];
 
+const CYCLING_DISCIPLINES = new Set(['Cycling', 'LaneBreak']);
+
 interface ChartsSectionProps {
   analytics: AnalyticsResult;
-  selectedTrendLength: number | null;
-  onSelectTrendLength: (length: number | null) => void;
 }
 
-export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLength }: ChartsSectionProps) {
-  const trendData = selectedTrendLength
-    ? analytics.trendPoints.filter((point) => point.lengthMinutes === selectedTrendLength)
-    : analytics.trendPoints;
+export function ChartsSection({ analytics }: ChartsSectionProps) {
+  const [selectedDiscipline, setSelectedDiscipline] = useState<string>(
+    analytics.trendDisciplines.find((d) => CYCLING_DISCIPLINES.has(d)) ?? analytics.trendDisciplines[0] ?? 'Cycling',
+  );
+  const [selectedLength, setSelectedLength] = useState<number | null>(null);
+
+  const isCycling = CYCLING_DISCIPLINES.has(selectedDiscipline);
+
+  const disciplinePoints = analytics.trendPoints.filter((p) => p.discipline === selectedDiscipline);
+
+  const availableLengths = [...new Set(disciplinePoints.map((p) => p.lengthMinutes))].sort((a, b) => a - b);
+
+  const filteredPoints = selectedLength
+    ? disciplinePoints.filter((p) => p.lengthMinutes === selectedLength)
+    : disciplinePoints;
+
+  const displayPoints = addMovingAverage(
+    filteredPoints.map((p) => ({
+      ...p,
+      value: isCycling ? (p.outputKj ?? 0) : (p.calories ?? 0),
+    })),
+  );
+
+  const valueUnit = isCycling ? 'kJ' : 'cal';
+
+  function handleSelectDiscipline(discipline: string) {
+    setSelectedDiscipline(discipline);
+    setSelectedLength(null);
+  }
 
   return (
     <>
@@ -41,17 +66,17 @@ export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLen
 
       <SectionCard
         title="Performance Trends"
-        subtitle="Output progression from the normalized cycling dataset."
+        subtitle="Output progression from the normalized dataset."
         actions={
           <div className="chip-row">
-            <button className={`chip${selectedTrendLength === null ? ' chip--active' : ''}`} onClick={() => onSelectTrendLength(null)}>
+            <button className={`chip${selectedLength === null ? ' chip--active' : ''}`} onClick={() => setSelectedLength(null)}>
               All
             </button>
-            {analytics.trendLengths.map((length) => (
+            {availableLengths.map((length) => (
               <button
                 key={length}
-                className={`chip${selectedTrendLength === length ? ' chip--active' : ''}`}
-                onClick={() => onSelectTrendLength(length)}
+                className={`chip${selectedLength === length ? ' chip--active' : ''}`}
+                onClick={() => setSelectedLength(length)}
               >
                 {length} min
               </button>
@@ -59,18 +84,30 @@ export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLen
           </div>
         }
       >
-        {trendData.length === 0 ? (
-          <EmptyState message="No cycling workouts with output data were found for this filter." />
+        <div className="tab-row" style={{ marginBottom: 16 }}>
+          {analytics.trendDisciplines.map((discipline) => (
+            <button
+              key={discipline}
+              className={`chip${selectedDiscipline === discipline ? ' chip--active' : ''}`}
+              onClick={() => handleSelectDiscipline(discipline)}
+            >
+              {discipline}
+            </button>
+          ))}
+        </div>
+
+        {displayPoints.length === 0 ? (
+          <EmptyState message="No workouts with performance data were found for this filter." />
         ) : (
           <div className="chart-frame chart-frame--large">
             <ResponsiveContainer>
-              <LineChart data={addMovingAverage(trendData)}>
+              <LineChart data={displayPoints}>
                 <CartesianGrid strokeDasharray="3 3" vertical={false} />
                 <XAxis dataKey="workoutNumber" />
                 <YAxis />
-                <Tooltip formatter={(value) => formatTooltipValue(value, ' kJ', 1)} labelFormatter={(label) => `Workout #${label}`} />
+                <Tooltip content={<TrendTooltip valueUnit={valueUnit} />} />
                 <Legend />
-                <Line type="monotone" dataKey="outputKj" stroke="#1f6feb" strokeWidth={2} dot={{ r: 3 }} name="Output" />
+                <Line type="monotone" dataKey="value" stroke="#1f6feb" strokeWidth={2} dot={{ r: 3 }} name={isCycling ? 'Output' : 'Calories'} />
                 <Line type="monotone" dataKey="movingAverage" stroke="#ff6a3d" strokeWidth={2} dot={false} name="Moving average" />
               </LineChart>
             </ResponsiveContainer>
@@ -78,6 +115,28 @@ export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLen
         )}
       </SectionCard>
     </>
+  );
+}
+
+function TrendTooltip({ active, payload, label, valueUnit }: {
+  active?: boolean;
+  payload?: { name: string; value: number; color: string }[];
+  label?: number;
+  valueUnit: string;
+}) {
+  if (!active || !payload?.length) return null;
+  const point = (payload[0] as any).payload as TrendPoint & { value: number; movingAverage?: number };
+
+  return (
+    <div className="trend-tooltip">
+      <p className="trend-tooltip__label">Workout #{label} ({point.dateLabel})</p>
+      {payload.map((entry) => (
+        <p key={entry.name} className="trend-tooltip__value" style={{ color: entry.color }}>
+          {entry.name}: {formatNumber(entry.value, 1)} {valueUnit}
+        </p>
+      ))}
+      <p className="trend-tooltip__instructor">{point.instructor}</p>
+    </div>
   );
 }
 
@@ -165,11 +224,11 @@ function BarDistributionChart({ data, dataKey }: { data: NamedCount[]; dataKey: 
   );
 }
 
-function addMovingAverage(points: TrendPoint[]) {
+function addMovingAverage(points: (TrendPoint & { value: number })[]) {
   return points.map((point, index) => {
     const start = Math.max(0, index - 2);
     const window = points.slice(start, index + 1);
-    const movingAverage = window.reduce((sum, entry) => sum + entry.outputKj, 0) / window.length;
+    const movingAverage = window.reduce((sum, entry) => sum + entry.value, 0) / window.length;
     return { ...point, movingAverage: Number(movingAverage.toFixed(1)) };
   });
 }

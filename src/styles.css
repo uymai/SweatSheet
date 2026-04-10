@@ -322,6 +322,34 @@ input {
   height: 280px;
 }
 
+.trend-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(19, 34, 56, 0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 16px rgba(15, 47, 87, 0.14);
+  font-size: 0.85rem;
+  max-width: 280px;
+}
+
+.trend-tooltip__label {
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: #132238;
+}
+
+.trend-tooltip__value {
+  margin: 2px 0;
+}
+
+.trend-tooltip__instructor {
+  margin: 8px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(19, 34, 56, 0.1);
+  color: #55708f;
+  font-style: italic;
+}
+
 .instructor-table-frame {
   height: 280px;
   overflow-y: auto;
@@ -558,6 +586,20 @@ input {
 [data-theme="dark"] .fab-pill__btn--active {
   background: #c9daf0;
   color: #0d1117;
+}
+
+[data-theme="dark"] .trend-tooltip {
+  background: rgba(13, 25, 42, 0.97);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .trend-tooltip__label {
+  color: #c9daf0;
+}
+
+[data-theme="dark"] .trend-tooltip__instructor {
+  color: #6a8aaa;
+  border-color: rgba(255, 255, 255, 0.1);
 }
 
 [data-theme="dark"] .instructor-table th {

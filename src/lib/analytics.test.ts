@@ -62,7 +62,7 @@ describe('computeAnalytics', () => {
     expect(analytics.totals.totalOutputKj).toBe(820);
     expect(analytics.personalRecords.regular[30]).toHaveLength(2);
     expect(analytics.personalRecords.lanebreak[30]).toHaveLength(1);
-    expect(analytics.trendPoints).toHaveLength(3);
+    expect(analytics.trendPoints).toHaveLength(4);
     expect(analytics.distributions.favoriteDayDistribution[0]?.label ?? analytics.favoriteDay?.day).toBeTruthy();
   });
 });

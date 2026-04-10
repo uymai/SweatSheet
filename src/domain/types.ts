@@ -77,7 +77,10 @@ export interface TrendPoint {
   workoutDayKey: string;
   dateLabel: string;
   lengthMinutes: number;
-  outputKj: number;
+  outputKj: number | null;
+  calories: number | null;
+  discipline: string;
+  instructor: string;
 }
 
 export interface HeatmapCell {
@@ -137,6 +140,7 @@ export interface AnalyticsResult {
   availableDurations: number[];
   trendPoints: TrendPoint[];
   trendLengths: number[];
+  trendDisciplines: string[];
   streaks: {
     strict: number;
     lenient: number;
