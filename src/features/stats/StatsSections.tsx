@@ -1,12 +1,13 @@
 import { SectionCard } from '../../components/SectionCard';
-import type { AnalyticsResult } from '../../domain/types';
-import { formatNumber, formatTime } from '../../lib/format';
+import type { AnalyticsResult, UnitSystem } from '../../domain/types';
+import { formatDistance, formatNumber, formatTime } from '../../lib/format';
 
 interface StatsSectionsProps {
   analytics: AnalyticsResult;
+  unitSystem: UnitSystem;
 }
 
-export function StatsSections({ analytics }: StatsSectionsProps) {
+export function StatsSections({ analytics, unitSystem }: StatsSectionsProps) {
   const { totals, funStats, metadata } = analytics;
 
   return (
@@ -18,7 +19,7 @@ export function StatsSections({ analytics }: StatsSectionsProps) {
             <Metric label="Cycling Workouts" value={`${formatNumber(totals.cyclingWorkouts)} (${formatNumber(totals.cyclingPercentage, 1)}%)`} />
             <Metric label="Total Time" value={formatTime(totals.totalMinutes)} />
             <Metric label="Average Ride" value={formatTime(totals.averageMinutes)} />
-            <Metric label="Total Distance" value={`${formatNumber(totals.totalDistanceKm, 1)} km`} />
+            <Metric label="Total Distance" value={formatDistance(totals.totalDistanceKm, unitSystem)} />
             <Metric label="Total Calories" value={formatNumber(totals.totalCalories)} />
             <Metric label="Favorite Instructor" value={`${totals.favoriteInstructor} (${formatTime(totals.favoriteInstructorMinutes)})`} />
             <Metric label="Most Frequent Type" value={totals.mostFrequentType} />
@@ -46,7 +47,7 @@ export function StatsSections({ analytics }: StatsSectionsProps) {
           />
           <FunCard
             title="Distance Travelled"
-            value={`${formatNumber(totals.totalDistanceKm, 1)} km`}
+            value={formatDistance(totals.totalDistanceKm, unitSystem)}
             comparisons={[
               `Around the world: ${formatNumber(funStats.aroundWorldPercent, 2)}%`,
               `To the moon: ${formatNumber(funStats.toMoonPercent, 4)}%`,

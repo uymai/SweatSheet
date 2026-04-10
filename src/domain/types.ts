@@ -2,6 +2,8 @@ export type RawWorkoutRow = Record<string, string>;
 
 export type RideType = 'regular' | 'lanebreak';
 
+export type UnitSystem = 'metric' | 'imperial';
+
 export interface ParsedTimestamp {
   date: Date;
   dayKey: string;
@@ -75,7 +77,10 @@ export interface TrendPoint {
   workoutDayKey: string;
   dateLabel: string;
   lengthMinutes: number;
-  outputKj: number;
+  outputKj: number | null;
+  calories: number | null;
+  discipline: string;
+  instructor: string;
 }
 
 export interface HeatmapCell {
@@ -135,6 +140,7 @@ export interface AnalyticsResult {
   availableDurations: number[];
   trendPoints: TrendPoint[];
   trendLengths: number[];
+  trendDisciplines: string[];
   streaks: {
     strict: number;
     lenient: number;

@@ -62,6 +62,7 @@ input {
 .dashboard {
   display: grid;
   gap: 24px;
+  margin-top: 24px;
 }
 
 .stats-grid {
@@ -151,6 +152,90 @@ input {
   color: #f8fbff;
 }
 
+.settings-fab {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 8px;
+}
+
+.settings-fab__trigger {
+  border: 1px solid rgba(19, 34, 56, 0.18);
+  border-radius: 999px;
+  padding: 9px 18px;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(15, 47, 87, 0.18);
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #132238;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.settings-fab__trigger:hover {
+  background: #e6edf5;
+}
+
+.settings-fab__trigger--open {
+  background: #132238;
+  color: #f8fbff;
+}
+
+.settings-fab__panel {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 8px;
+  width: 110px;
+  overflow: hidden;
+  max-height: 0;
+  opacity: 0;
+  transition: max-height 260ms ease, opacity 200ms ease;
+}
+
+.settings-fab__panel--open {
+  max-height: 120px;
+  opacity: 1;
+}
+
+.fab-pill {
+  display: flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(19, 34, 56, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(15, 47, 87, 0.18);
+}
+
+.fab-pill__btn {
+  flex: 1;
+  border: none;
+  background: transparent;
+  padding: 9px 0;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #55708f;
+  text-align: center;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.fab-pill__btn:hover {
+  background: #e6edf5;
+}
+
+.fab-pill__btn--active {
+  background: #132238;
+  color: #f8fbff;
+  cursor: default;
+}
+
 .upload-panel {
   display: flex;
   gap: 18px;
@@ -237,6 +322,83 @@ input {
   height: 280px;
 }
 
+.trend-tooltip {
+  background: rgba(255, 255, 255, 0.97);
+  border: 1px solid rgba(19, 34, 56, 0.12);
+  border-radius: 12px;
+  padding: 10px 14px;
+  box-shadow: 0 4px 16px rgba(15, 47, 87, 0.14);
+  font-size: 0.85rem;
+  max-width: 280px;
+}
+
+.trend-tooltip__label {
+  margin: 0 0 6px;
+  font-weight: 600;
+  color: #132238;
+}
+
+.trend-tooltip__value {
+  margin: 2px 0;
+}
+
+.trend-tooltip__instructor {
+  margin: 8px 0 0;
+  padding-top: 6px;
+  border-top: 1px solid rgba(19, 34, 56, 0.1);
+  color: #55708f;
+  font-style: italic;
+}
+
+.instructor-table-frame {
+  height: 280px;
+  overflow-y: auto;
+}
+
+.instructor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.instructor-table thead {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
+
+.instructor-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #55708f;
+  border-bottom: 1px solid rgba(19, 34, 56, 0.1);
+}
+
+.instructor-table th:last-child {
+  text-align: right;
+}
+
+.instructor-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(19, 34, 56, 0.06);
+  color: #132238;
+}
+
+.instructor-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #1f6feb;
+}
+
+.instructor-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .chart-frame--large {
   height: 360px;
 }
@@ -244,6 +406,7 @@ input {
 .empty-state,
 .empty-panel,
 .banner {
+  margin-top: 24px;
   padding: 20px;
   border-radius: 20px;
   background: rgba(255, 255, 255, 0.72);
@@ -335,4 +498,120 @@ input {
   .chart-frame {
     height: 240px;
   }
+}
+
+/* ─── Dark Mode ──────────────────────────────────────────────── */
+
+[data-theme="dark"] {
+  color: #c9daf0;
+  background:
+    radial-gradient(circle at top left, rgba(31, 111, 235, 0.2), transparent 30%),
+    linear-gradient(180deg, #0d1117 0%, #0d1f35 100%);
+}
+
+[data-theme="dark"] .section-card {
+  background: rgba(13, 25, 42, 0.88);
+  border-color: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.35);
+}
+
+[data-theme="dark"] .section-card__header p,
+[data-theme="dark"] .metric-card span,
+[data-theme="dark"] .fun-card ul,
+[data-theme="dark"] .pr-card__headline p,
+[data-theme="dark"] .upload-panel__meta span {
+  color: #6a8aaa;
+}
+
+[data-theme="dark"] .button--secondary,
+[data-theme="dark"] .chip {
+  background: #1a2d45;
+  color: #c9daf0;
+}
+
+[data-theme="dark"] .chip--active {
+  background: #c9daf0;
+  color: #0d1117;
+}
+
+[data-theme="dark"] .metric-card,
+[data-theme="dark"] .fun-card {
+  background: #0d1f35;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .empty-state,
+[data-theme="dark"] .empty-panel,
+[data-theme="dark"] .banner {
+  background: rgba(13, 25, 42, 0.72);
+  border-color: rgba(255, 255, 255, 0.12);
+  color: #6a8aaa;
+}
+
+[data-theme="dark"] .heatmap-cell {
+  background: #1a2d45;
+  color: #c9daf0;
+}
+
+[data-theme="dark"] .settings-fab__trigger {
+  background: rgba(13, 25, 42, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+  color: #c9daf0;
+}
+
+[data-theme="dark"] .settings-fab__trigger:hover {
+  background: #1a2d45;
+}
+
+[data-theme="dark"] .settings-fab__trigger--open {
+  background: #c9daf0;
+  color: #0d1117;
+}
+
+[data-theme="dark"] .fab-pill {
+  background: rgba(13, 25, 42, 0.92);
+  border-color: rgba(255, 255, 255, 0.12);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.45);
+}
+
+[data-theme="dark"] .fab-pill__btn {
+  color: #6a8aaa;
+}
+
+[data-theme="dark"] .fab-pill__btn:hover {
+  background: #1a2d45;
+}
+
+[data-theme="dark"] .fab-pill__btn--active {
+  background: #c9daf0;
+  color: #0d1117;
+}
+
+[data-theme="dark"] .trend-tooltip {
+  background: rgba(13, 25, 42, 0.97);
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .trend-tooltip__label {
+  color: #c9daf0;
+}
+
+[data-theme="dark"] .trend-tooltip__instructor {
+  color: #6a8aaa;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .instructor-table th {
+  color: #6a8aaa;
+  border-color: rgba(255, 255, 255, 0.1);
+}
+
+[data-theme="dark"] .instructor-table td {
+  color: #c9daf0;
+  border-color: rgba(255, 255, 255, 0.06);
+}
+
+[data-theme="dark"] .instructor-table thead {
+  background: rgba(13, 25, 42, 0.97);
 }

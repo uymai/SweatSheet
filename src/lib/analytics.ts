@@ -38,7 +38,7 @@ export function computeAnalytics(workouts: Workout[], rawRowCount: number, inval
   const mostFrequentTypeEntry = [...workoutTypeCounts.entries()].sort((left, right) => right[1] - left[1])[0];
 
   const personalRecords = buildPersonalRecords(cyclingWorkouts);
-  const trendPoints = buildTrendPoints(cyclingWorkouts);
+  const trendPoints = buildTrendPoints(sortedWorkouts);
   const streaks = calculateStreaks(sortedWorkouts.map((workout) => workout.workoutDayKey));
   const favoriteDayDistribution = mapCountsToSortedList(favoriteDayCounts, DAY_NAMES);
   const favoriteDay = favoriteDayDistribution.reduce<{ day: string; count: number } | null>((best, item) => {
@@ -80,13 +80,14 @@ export function computeAnalytics(workouts: Workout[], rawRowCount: number, inval
     distributions: {
       workoutTypes: mapCountsToSortedList(workoutTypeCounts).slice(0, 10),
       durations: mapCountsToSortedList(durationCounts, undefined, durationLabelSort),
-      instructors: mapCountsToSortedList(instructorCounts).filter((item) => item.label !== 'Unknown').slice(0, 10),
+      instructors: mapCountsToSortedList(instructorCounts).filter((item) => item.label !== 'Unknown'),
       favoriteDayDistribution,
     },
     personalRecords,
     availableDurations: [...PR_DURATIONS],
     trendPoints,
     trendLengths: [...new Set(trendPoints.map((point) => point.lengthMinutes))].sort((left, right) => left - right),
+    trendDisciplines: [...new Set(trendPoints.map((point) => point.discipline))].sort(),
     streaks,
     favoriteDay: favoriteDay && favoriteDay.count >= 1 ? favoriteDay : null,
     heatmapMonths: buildHeatmapMonths(sortedWorkouts),
@@ -137,7 +138,7 @@ function buildPersonalRecords(workouts: Workout[]): Record<RideType, Record<numb
 
 function buildTrendPoints(workouts: Workout[]): TrendPoint[] {
   return workouts
-    .filter((workout) => typeof workout.metrics.outputKj === 'number')
+    .filter((workout) => workout.metrics.outputKj !== null || workout.metrics.calories !== null)
     .sort((left, right) => left.workoutAt.getTime() - right.workoutAt.getTime())
     .map((workout, index) => ({
       workoutId: workout.id,
@@ -145,7 +146,10 @@ function buildTrendPoints(workouts: Workout[]): TrendPoint[] {
       workoutDayKey: workout.workoutDayKey,
       dateLabel: formatDateLabel(workout.workoutDayKey),
       lengthMinutes: workout.lengthMinutes,
-      outputKj: workout.metrics.outputKj ?? 0,
+      outputKj: workout.metrics.outputKj,
+      calories: workout.metrics.calories,
+      discipline: workout.discipline,
+      instructor: workout.instructor,
     }));
 }
 

@@ -1,5 +1,5 @@
-import { useMemo, useState, useTransition } from 'react';
-import type { RideType, RawWorkoutRow, AnalyticsResult } from './domain/types';
+import { useLayoutEffect, useMemo, useState, useTransition } from 'react';
+import type { RideType, RawWorkoutRow, AnalyticsResult, UnitSystem } from './domain/types';
 import { normalizeWorkouts, parseCsvFile } from './lib/peloton';
 import { computeAnalytics } from './lib/analytics';
 import { UploadPanel } from './features/upload/UploadPanel';
@@ -20,8 +20,14 @@ export default function App() {
   const [selectedRideType, setSelectedRideType] = useState<RideType>('regular');
   const [selectedDuration, setSelectedDuration] = useState(30);
   const [selectedPRIndex, setSelectedPRIndex] = useState(0);
-  const [selectedTrendLength, setSelectedTrendLength] = useState<number | null>(null);
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
+  const [darkMode, setDarkMode] = useState(() => window.matchMedia('(prefers-color-scheme: dark)').matches);
+  const [settingsOpen, setSettingsOpen] = useState(false);
   const [isPending, startTransition] = useTransition();
+
+  useLayoutEffect(() => {
+    document.documentElement.setAttribute('data-theme', darkMode ? 'dark' : 'light');
+  }, [darkMode]);
 
   const canReprocess = sourceRows.length > 0 && status !== 'error';
 
@@ -65,7 +71,6 @@ export default function App() {
       setSelectedRideType('regular');
       setSelectedDuration(resolveDefaultDuration(nextAnalysis));
       setSelectedPRIndex(0);
-      setSelectedTrendLength(null);
       setFileName(currentFileName);
       setStatusMessage(
         normalization.issues.length === 0
@@ -128,6 +133,47 @@ export default function App() {
         onReprocess={handleReprocess}
       />
 
+      <div className="settings-fab">
+        <button
+          className={`settings-fab__trigger${settingsOpen ? ' settings-fab__trigger--open' : ''}`}
+          onClick={() => setSettingsOpen((o) => !o)}
+          aria-expanded={settingsOpen}
+          aria-label="Settings"
+        >
+          ⚙ Settings
+        </button>
+        <div className={`settings-fab__panel${settingsOpen ? ' settings-fab__panel--open' : ''}`}>
+          <div className="fab-pill" role="group" aria-label="Theme">
+            <button
+              className={`fab-pill__btn${!darkMode ? ' fab-pill__btn--active' : ''}`}
+              onClick={() => darkMode && setDarkMode(false)}
+            >
+              ☀
+            </button>
+            <button
+              className={`fab-pill__btn${darkMode ? ' fab-pill__btn--active' : ''}`}
+              onClick={() => !darkMode && setDarkMode(true)}
+            >
+              ☾
+            </button>
+          </div>
+          <div className="fab-pill" role="group" aria-label="Unit system">
+            <button
+              className={`fab-pill__btn${unitSystem === 'metric' ? ' fab-pill__btn--active' : ''}`}
+              onClick={() => unitSystem !== 'metric' && setUnitSystem('metric')}
+            >
+              km
+            </button>
+            <button
+              className={`fab-pill__btn${unitSystem === 'imperial' ? ' fab-pill__btn--active' : ''}`}
+              onClick={() => unitSystem !== 'imperial' && setUnitSystem('imperial')}
+            >
+              mi
+            </button>
+          </div>
+        </div>
+      </div>
+
       {status === 'error' ? <div className="banner banner--error">{errorMessage ?? 'The CSV could not be processed.'}</div> : null}
 
       {!analysis ? (
@@ -137,13 +183,14 @@ export default function App() {
         </div>
       ) : (
         <main className="dashboard">
-          <StatsSections analytics={analysis} />
-          <ChartsSection analytics={analysis} selectedTrendLength={selectedTrendLength} onSelectTrendLength={setSelectedTrendLength} />
+          <StatsSections analytics={analysis} unitSystem={unitSystem} />
+          <ChartsSection analytics={analysis} />
           <PRSection
             analytics={analysis}
             rideType={selectedRideType}
             duration={selectedDuration}
             index={selectedPRIndex}
+            unitSystem={unitSystem}
             onSelectRideType={handleSelectRideType}
             onSelectDuration={handleSelectDuration}
             onNavigate={handleNavigatePR}
