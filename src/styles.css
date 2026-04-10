@@ -152,6 +152,41 @@ input {
   color: #f8fbff;
 }
 
+.unit-toggle-fab {
+  position: fixed;
+  top: 20px;
+  right: 24px;
+  z-index: 100;
+  display: flex;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid rgba(19, 34, 56, 0.18);
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(12px);
+  box-shadow: 0 4px 20px rgba(15, 47, 87, 0.18);
+}
+
+.unit-toggle-fab__btn {
+  border: none;
+  background: transparent;
+  padding: 9px 16px;
+  cursor: pointer;
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: #55708f;
+  transition: background 160ms ease, color 160ms ease;
+}
+
+.unit-toggle-fab__btn:hover {
+  background: #e6edf5;
+}
+
+.unit-toggle-fab__btn--active {
+  background: #132238;
+  color: #f8fbff;
+  cursor: default;
+}
+
 .upload-panel {
   display: flex;
   gap: 18px;

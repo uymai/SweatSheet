@@ -1,5 +1,5 @@
 import { useMemo, useState, useTransition } from 'react';
-import type { RideType, RawWorkoutRow, AnalyticsResult } from './domain/types';
+import type { RideType, RawWorkoutRow, AnalyticsResult, UnitSystem } from './domain/types';
 import { normalizeWorkouts, parseCsvFile } from './lib/peloton';
 import { computeAnalytics } from './lib/analytics';
 import { UploadPanel } from './features/upload/UploadPanel';
@@ -21,6 +21,7 @@ export default function App() {
   const [selectedDuration, setSelectedDuration] = useState(30);
   const [selectedPRIndex, setSelectedPRIndex] = useState(0);
   const [selectedTrendLength, setSelectedTrendLength] = useState<number | null>(null);
+  const [unitSystem, setUnitSystem] = useState<UnitSystem>('metric');
   const [isPending, startTransition] = useTransition();
 
   const canReprocess = sourceRows.length > 0 && status !== 'error';
@@ -128,6 +129,21 @@ export default function App() {
         onReprocess={handleReprocess}
       />
 
+      <div className="unit-toggle-fab" role="group" aria-label="Unit system">
+        <button
+          className={`unit-toggle-fab__btn${unitSystem === 'metric' ? ' unit-toggle-fab__btn--active' : ''}`}
+          onClick={() => unitSystem !== 'metric' && setUnitSystem('metric')}
+        >
+          km
+        </button>
+        <button
+          className={`unit-toggle-fab__btn${unitSystem === 'imperial' ? ' unit-toggle-fab__btn--active' : ''}`}
+          onClick={() => unitSystem !== 'imperial' && setUnitSystem('imperial')}
+        >
+          mi
+        </button>
+      </div>
+
       {status === 'error' ? <div className="banner banner--error">{errorMessage ?? 'The CSV could not be processed.'}</div> : null}
 
       {!analysis ? (
@@ -137,13 +153,14 @@ export default function App() {
         </div>
       ) : (
         <main className="dashboard">
-          <StatsSections analytics={analysis} />
+          <StatsSections analytics={analysis} unitSystem={unitSystem} />
           <ChartsSection analytics={analysis} selectedTrendLength={selectedTrendLength} onSelectTrendLength={setSelectedTrendLength} />
           <PRSection
             analytics={analysis}
             rideType={selectedRideType}
             duration={selectedDuration}
             index={selectedPRIndex}
+            unitSystem={unitSystem}
             onSelectRideType={handleSelectRideType}
             onSelectDuration={handleSelectDuration}
             onNavigate={handleNavigatePR}

@@ -2,6 +2,8 @@ export type RawWorkoutRow = Record<string, string>;
 
 export type RideType = 'regular' | 'lanebreak';
 
+export type UnitSystem = 'metric' | 'imperial';
+
 export interface ParsedTimestamp {
   date: Date;
   dayKey: string;

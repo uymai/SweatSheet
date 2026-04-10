@@ -1,3 +1,20 @@
+import type { UnitSystem } from '../domain/types';
+
+export function formatDistance(km: number, unit: UnitSystem, digits = 1): string {
+  if (unit === 'imperial') {
+    return `${formatNumber(km * 0.621371, digits)} mi`;
+  }
+  return `${formatNumber(km, digits)} km`;
+}
+
+export function formatSpeed(kph: number | null, unit: UnitSystem): string {
+  if (kph === null) return '-';
+  if (unit === 'imperial') {
+    return `${formatNumber(kph * 0.621371, 1)} mph`;
+  }
+  return `${formatNumber(kph, 1)} kph`;
+}
+
 export function formatNumber(value: number, digits = 0): string {
   return value.toLocaleString(undefined, {
     minimumFractionDigits: digits,

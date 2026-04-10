@@ -1,3 +1,7 @@
+# Peloton CSV exports (personal data)
+*.csv
+!sample/*.csv
+
 # OS generated files
 .DS_Store
 .DS_Store?

@@ -1,12 +1,13 @@
 import { SectionCard } from '../../components/SectionCard';
-import type { AnalyticsResult, RideType } from '../../domain/types';
-import { formatDateLabel, formatNumber } from '../../lib/format';
+import type { AnalyticsResult, RideType, UnitSystem } from '../../domain/types';
+import { formatDateLabel, formatDistance, formatNumber, formatSpeed } from '../../lib/format';
 
 interface PRSectionProps {
   analytics: AnalyticsResult;
   rideType: RideType;
   duration: number;
   index: number;
+  unitSystem: UnitSystem;
   onSelectRideType: (rideType: RideType) => void;
   onSelectDuration: (duration: number) => void;
   onNavigate: (direction: 'older' | 'newer') => void;
@@ -17,6 +18,7 @@ export function PRSection({
   rideType,
   duration,
   index,
+  unitSystem,
   onSelectRideType,
   onSelectDuration,
   onNavigate,
@@ -67,8 +69,8 @@ export function PRSection({
             <Metric label="Avg Watts" value={formatNullable(current.metrics.avgWatts, ' W')} />
             <Metric label="Avg Resistance" value={formatNullable(current.metrics.avgResistance)} />
             <Metric label="Avg Cadence" value={formatNullable(current.metrics.avgCadence, ' RPM')} />
-            <Metric label="Avg Speed" value={formatNullable(current.metrics.avgSpeedKph, ' kph')} />
-            <Metric label="Distance" value={formatNullable(current.metrics.distanceKm, ' km')} />
+            <Metric label="Avg Speed" value={formatSpeed(current.metrics.avgSpeedKph, unitSystem)} />
+            <Metric label="Distance" value={current.metrics.distanceKm === null ? '-' : formatDistance(current.metrics.distanceKm, unitSystem)} />
             <Metric label="Calories" value={formatNullable(current.metrics.calories)} />
             <Metric label="Avg Heart Rate" value={formatNullable(current.metrics.avgHeartRate, ' bpm')} />
           </div>

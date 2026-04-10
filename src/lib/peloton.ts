@@ -99,13 +99,20 @@ export function normalizeWorkouts(rows: RawWorkoutRow[]): NormalizationResult {
       return;
     }
 
+    const distanceKm =
+      parseNullableNumber(row['Distance (km)']) ??
+      convertToKm(parseNullableNumber(row['Distance (mi)']));
+    const avgSpeedKph =
+      parseNullableNumber(row['Avg. Speed (kph)']) ??
+      convertToKph(parseNullableNumber(row['Avg. Speed (mph)']));
+
     const metrics: WorkoutMetrics = {
       outputKj: parseNullableNumber(row['Total Output']),
       avgWatts: parseNullableNumber(row['Avg. Watts']),
       avgResistance: parseNullableNumber(row['Avg. Resistance']),
       avgCadence: parseNullableNumber(row['Avg. Cadence (RPM)']),
-      avgSpeedKph: parseNullableNumber(row['Avg. Speed (kph)']),
-      distanceKm: parseNullableNumber(row['Distance (km)']),
+      avgSpeedKph,
+      distanceKm,
       calories: parseNullableNumber(row['Calories Burned']),
       avgHeartRate: parseNullableNumber(row['Avg. Heartrate']),
     };
@@ -134,6 +141,14 @@ export function normalizeWorkouts(rows: RawWorkoutRow[]): NormalizationResult {
   });
 
   return { workouts, issues };
+}
+
+function convertToKm(miles: number | null): number | null {
+  return miles === null ? null : miles * 1.60934;
+}
+
+function convertToKph(mph: number | null): number | null {
+  return mph === null ? null : mph * 1.60934;
 }
 
 function normalizeOffsetToken(token: string): string | null {
