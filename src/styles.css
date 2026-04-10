@@ -273,6 +273,55 @@ input {
   height: 280px;
 }
 
+.instructor-table-frame {
+  height: 280px;
+  overflow-y: auto;
+}
+
+.instructor-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.9rem;
+}
+
+.instructor-table thead {
+  position: sticky;
+  top: 0;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(8px);
+  z-index: 1;
+}
+
+.instructor-table th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #55708f;
+  border-bottom: 1px solid rgba(19, 34, 56, 0.1);
+}
+
+.instructor-table th:last-child {
+  text-align: right;
+}
+
+.instructor-table td {
+  padding: 9px 12px;
+  border-bottom: 1px solid rgba(19, 34, 56, 0.06);
+  color: #132238;
+}
+
+.instructor-table td:last-child {
+  text-align: right;
+  font-weight: 600;
+  color: #1f6feb;
+}
+
+.instructor-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
 .chart-frame--large {
   height: 360px;
 }

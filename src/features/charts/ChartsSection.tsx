@@ -1,4 +1,4 @@
-import type { ReactNode } from 'react';
+import { useState, type ReactNode } from 'react';
 import {
   Bar,
   BarChart,
@@ -36,7 +36,7 @@ export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLen
       <div className="stats-grid stats-grid--charts">
         <ChartCard title="Workout Type Distribution" data={analytics.distributions.workoutTypes} chart={<WorkoutTypeChart data={analytics.distributions.workoutTypes} />} />
         <ChartCard title="Workout Time Distribution" data={analytics.distributions.durations} chart={<BarDistributionChart data={analytics.distributions.durations} dataKey="value" />} />
-        <ChartCard title="Top Instructors" data={analytics.distributions.instructors} chart={<BarDistributionChart data={analytics.distributions.instructors} dataKey="value" />} />
+        <InstructorsCard data={analytics.distributions.instructors} />
       </div>
 
       <SectionCard
@@ -78,6 +78,48 @@ export function ChartsSection({ analytics, selectedTrendLength, onSelectTrendLen
         )}
       </SectionCard>
     </>
+  );
+}
+
+function InstructorsCard({ data }: { data: NamedCount[] }) {
+  const [view, setView] = useState<'top5' | 'all'>('top5');
+  const top5 = data.slice(0, 5);
+
+  return (
+    <SectionCard
+      title="Top Instructors"
+      actions={
+        <div className="chip-row">
+          <button className={`chip${view === 'top5' ? ' chip--active' : ''}`} onClick={() => setView('top5')}>Top 5</button>
+          <button className={`chip${view === 'all' ? ' chip--active' : ''}`} onClick={() => setView('all')}>All</button>
+        </div>
+      }
+    >
+      {data.length === 0 ? (
+        <EmptyState message="No data available yet." />
+      ) : view === 'top5' ? (
+        <BarDistributionChart data={top5} dataKey="value" />
+      ) : (
+        <div className="instructor-table-frame">
+          <table className="instructor-table">
+            <thead>
+              <tr>
+                <th>Instructor</th>
+                <th>Classes</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data.map((row, index) => (
+                <tr key={row.label}>
+                  <td>{index + 1}. {row.label}</td>
+                  <td>{formatNumber(row.value)}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </SectionCard>
   );
 }
 

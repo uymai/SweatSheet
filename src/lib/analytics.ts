@@ -80,7 +80,7 @@ export function computeAnalytics(workouts: Workout[], rawRowCount: number, inval
     distributions: {
       workoutTypes: mapCountsToSortedList(workoutTypeCounts).slice(0, 10),
       durations: mapCountsToSortedList(durationCounts, undefined, durationLabelSort),
-      instructors: mapCountsToSortedList(instructorCounts).filter((item) => item.label !== 'Unknown').slice(0, 10),
+      instructors: mapCountsToSortedList(instructorCounts).filter((item) => item.label !== 'Unknown'),
       favoriteDayDistribution,
     },
     personalRecords,
